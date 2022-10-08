@@ -49,8 +49,7 @@ class TabsHook extends Logger {
     let scrollRoot: any;
     async function findScrollRoot(currentNode: any, iters: number): Promise<any> {
       if (iters >= 30) {
-        await sleep(5000);
-        return await findScrollRoot(tree, 0);
+        return null;
       }
       currentNode = currentNode?.child;
       if (currentNode?.type?.prototype?.RemoveSmartScrollContainer) return currentNode;
@@ -63,9 +62,10 @@ class TabsHook extends Logger {
     }
     (async () => {
       scrollRoot = await findScrollRoot(tree, 0);
-      if (!scrollRoot) {
-        this.error('Failed to find scroll root node!');
-        return;
+      while (!scrollRoot) {
+        this.log('Failed to find scroll root node, reattempting in 5 seconds');
+        await sleep(5000);
+        scrollRoot = await findScrollRoot(tree, 0);
       }
       let newQA: any;
       let newQATabRenderer: any;
